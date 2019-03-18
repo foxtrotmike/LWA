@@ -15,8 +15,8 @@ from sklearn.kernel_approximation import RBFSampler
 import matplotlib.pyplot as plt #importing plotting module
 from plotit import plotit
 
-transformer = RBFSampler(gamma=0.1, n_components=200)
-transformer = PolynomialFeatures(2)
+#transformer = RBFSampler(gamma=0.9, n_components=200)
+transformer = PolynomialFeatures(3)
 
 def loss_rej(y, h, r=1, c=0):
     if type(r)!=type(1):
@@ -29,14 +29,16 @@ def loss_rej(y, h, r=1, c=0):
 def create_ex_gauss(m1=1.0, m2=-1.0, sd=1.4, n=500):        #create example gaussian
     Xp =sd* np.random.randn(n,2)+m1
     Xn =sd* np.random.randn(n,2)+m2
+    
     X = np.vstack((Xp,Xn))
     m = np.mean(X,axis=0)
     s = np.std(X,axis=0)
-#    Xp = (Xp-m)/s
-#    Xn = (Xn-m)/s
+    Xp = (Xp-m)/s
+    Xn = (Xn-m)/s
     data=[]
-    Xp2=transformer.fit_transform(Xp)
-    Xn2=transformer.fit_transform(Xn)
+    transformer.fit(np.vstack((Xp,Xn)))
+    Xp2=transformer.transform(Xp)
+    Xn2=transformer.transform(Xn)
     for i in range(len(Xp)):
         ex=Example()
         ex.features_u=Xp2[i]
@@ -66,7 +68,7 @@ if __name__ == '__main__':
 #    classifier=linclass_rej(epochs=300, Lambda_u=0.1, Lambda_w=0.1, alpha=1.0, c=0.40)
 #    classifier.train(examples)
     
-    classifier3=linclass_rej(epochs=500, Lambda_u=0.1, Lambda_w=0.01, alpha=1.0, c=0.4)
+    classifier3=linclass_rej(epochs=500, Lambda_u=0.1, Lambda_w=0.1, alpha=1.0, c=0.48)
     classifier3.train3(examples)
     
 #    plt.plot(classifier.losses); 
@@ -79,6 +81,6 @@ if __name__ == '__main__':
 #    plotit(X,Y,clf=classifier.classify, transform = transformer.fit_transform, conts =[-1,0,1] )
 #    plotit(X,Y,clf=classifier.reject, transform = transformer.fit_transform, conts =[-1,0,1] )
     
-    plotit(X,Y,clf=classifier3.reject, transform = transformer.fit_transform, conts =[0], ccolors = ['g'], hold = True )
-    plotit(X,Y,clf=classifier3.classify, transform = transformer.fit_transform, conts =[-1,0,1])
+    plotit(X,Y,clf=classifier3.reject, transform = transformer.transform, conts =[0], ccolors = ['g'], hold = False )
+    plotit(X,Y,clf=classifier3.classify, transform = transformer.transform, conts =[-1,0,1])
     
